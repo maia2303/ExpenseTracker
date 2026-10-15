@@ -1,6 +1,6 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({ navigation }) {
 
     return(
         <View style={styles.container}>
@@ -16,8 +16,21 @@ export default function WelcomeScreen() {
             <Text style = {styles.descripcion}>
                 Esta aplicación te ayudará a llevar un control de tus gastos y ahorros.
             </Text>
+
+            <TouchableOpacity
+            style={styles.boton}
+            onPress={() => navigation.navigate('Principal')}
+            accessibilityRole="button"
+            >
+            <Text style={styles.textoBoton}>
+                Continuar
+            </Text>
+            </TouchableOpacity>
+
         </View>
     )
+
+    
 
 }
 
@@ -50,5 +63,17 @@ const styles = StyleSheet.create({
         color: '#7F8C8D',
         lineHeight: 24, // Espacio entre líneas
         marginBottom: 50,
-    }
-})  
+    },
+
+    boton: {
+        backgroundColor: '#2980B9',
+        paddingVertical: 14,
+        paddingHorizontal: 28,
+        borderRadius: 10,
+    },
+    textoBoton: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+}
+})
