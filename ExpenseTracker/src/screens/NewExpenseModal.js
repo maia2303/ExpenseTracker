@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   View,
@@ -6,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  StyleSheet,
 } from 'react-native';
 
 export default function NewExpenseModal() {
@@ -22,8 +22,10 @@ export default function NewExpenseModal() {
       return;
     }
 
-    if (isNaN(Number(monto.replace(',', '.'))) ||
-        Number(monto.replace(',', '.')) <= 0) {
+    if (
+      isNaN(Number(monto.replace(',', '.'))) ||
+      Number(monto.replace(',', '.')) <= 0
+    ) {
       Alert.alert('Monto inválido', 'Ingresa un monto mayor que cero.');
       return;
     }
@@ -45,31 +47,23 @@ export default function NewExpenseModal() {
   };
 
   return (
-    <View className="flex-1 justify-center bg-gray-100 px-6 py-8">
-      <Text className="mb-2 text-3xl font-bold text-gray-800">
-        Nuevo gasto
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Nuevo gasto</Text>
 
-      <Text className="mb-6 text-base text-gray-500">
-        Completa los datos de tu gasto.
-      </Text>
+      <Text style={styles.subtitulo}>Completa los datos de tu gasto.</Text>
 
-      <Text className="mb-2 text-base font-semibold text-gray-700">
-        Nombre del gasto
-      </Text>
+      <Text style={styles.label}>Nombre del gasto</Text>
       <TextInput
-        className="mb-5 rounded-xl border border-gray-300 bg-white p-4 text-base text-gray-800"
+        style={styles.input}
         placeholder="Ej. Supermercado"
         placeholderTextColor="#9CA3AF"
         value={nombre}
         onChangeText={setNombre}
       />
 
-      <Text className="mb-2 text-base font-semibold text-gray-700">
-        Monto
-      </Text>
+      <Text style={styles.label}>Monto</Text>
       <TextInput
-        className="mb-5 rounded-xl border border-gray-300 bg-white p-4 text-base text-gray-800"
+        style={styles.input}
         placeholder="Ej. 25000"
         placeholderTextColor="#9CA3AF"
         value={monto}
@@ -77,11 +71,9 @@ export default function NewExpenseModal() {
         keyboardType="decimal-pad"
       />
 
-      <Text className="mb-2 text-base font-semibold text-gray-700">
-        Categoría
-      </Text>
+      <Text style={styles.label}>Categoría</Text>
       <TextInput
-        className="mb-7 rounded-xl border border-gray-300 bg-white p-4 text-base text-gray-800"
+        style={[styles.input, styles.lastInput]}
         placeholder="Ej. Alimentación"
         placeholderTextColor="#9CA3AF"
         value={categoria}
@@ -89,14 +81,63 @@ export default function NewExpenseModal() {
       />
 
       <TouchableOpacity
-        className="items-center rounded-xl bg-blue-600 p-4 active:bg-blue-700"
+        style={styles.boton}
         onPress={guardarGasto}
         activeOpacity={0.8}
       >
-        <Text className="text-base font-bold text-white">
-          Guardar
-        </Text>
+        <Text style={styles.textoBoton}>Guardar</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#F8F9FA',
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  titulo: {
+    marginBottom: 8,
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+  },
+  subtitulo: {
+    marginBottom: 24,
+    fontSize: 16,
+    color: '#7F8C8D',
+  },
+  label: {
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2C3E50',
+  },
+  input: {
+    marginBottom: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    fontSize: 16,
+    color: '#2C3E50',
+  },
+  lastInput: {
+    marginBottom: 28,
+  },
+  boton: {
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#2980B9',
+    padding: 16,
+  },
+  textoBoton: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+});

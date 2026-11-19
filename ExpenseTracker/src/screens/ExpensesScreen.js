@@ -1,41 +1,69 @@
 import React from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ExpenseItem from '../components/ExpenseItem';
+import { useExpenses } from '../context/ExpensesContext';
 
-// Datos definidos manualmente (el Sprint 1 no usa persistencia)
-const GASTOS = [
-  { id: '1', descripcion: 'Supermercado', monto: 25000 },
-  { id: '2', descripcion: 'Combustible', monto: 18000 },
-  { id: '3', descripcion: 'Internet', monto: 32000 },
-];
+export default function ExpensesScreen({ navigation }) {
+  const { expenses } = useExpenses();
 
-export default function ExpensesScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView style={styles.container}>
       <FlatList
-        data={GASTOS}
+        data={expenses}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ExpenseItem descripcion={item.descripcion} monto={item.monto} />
+          <ExpenseItem
+            title={item.title}
+            amount={item.amount}
+            category={item.category}
+            onPress={() => navigation.navigate('DetalleGasto', { id: item.id })}
+          />
         )}
-        contentContainerStyle={{ padding: 24 }}
+        contentContainerStyle={styles.listContent}
         ListHeaderComponent={
-          <View className="mb-4">
-            <Text className="mb-1 text-3xl font-bold text-gray-800">
-              Mis gastos
-            </Text>
-            <Text className="text-base text-gray-500">
-              Estos son tus gastos registrados.
+          <View style={styles.headerContainer}>
+            <Text style={styles.titulo}>Mis gastos</Text>
+            <Text style={styles.subtitulo}>
+              Toca un gasto para ver su detalle.
             </Text>
           </View>
         }
         ListEmptyComponent={
-          <Text className="text-center text-gray-500">
-            Todavía no hay gastos cargados.
+          <Text style={styles.emptyText}>
+            Todavía no registraste gastos.
           </Text>
         }
       />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  listContent: {
+    padding: 24,
+  },
+  headerContainer: {
+    marginBottom: 16,
+  },
+  titulo: {
+    marginBottom: 4,
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+  },
+  subtitulo: {
+    fontSize: 16,
+    color: '#7F8C8D',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#7F8C8D',
+    fontSize: 16,
+    marginTop: 24,
+  },
+});
