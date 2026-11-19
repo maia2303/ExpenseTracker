@@ -48,11 +48,17 @@ export default function NewExpenseModal() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Nuevo gasto</Text>
+      <Text style={styles.titulo}>
+        Nuevo gasto
+      </Text>
 
-      <Text style={styles.subtitulo}>Completa los datos de tu gasto.</Text>
+      <Text style={styles.subtitulo}>
+        Completa los datos de tu gasto.
+      </Text>
 
-      <Text style={styles.label}>Nombre del gasto</Text>
+      <Text style={styles.label}>
+        Nombre del gasto
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Ej. Supermercado"
@@ -61,7 +67,9 @@ export default function NewExpenseModal() {
         onChangeText={setNombre}
       />
 
-      <Text style={styles.label}>Monto</Text>
+      <Text style={styles.label}>
+        Monto
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Ej. 25000"
@@ -71,7 +79,9 @@ export default function NewExpenseModal() {
         keyboardType="decimal-pad"
       />
 
-      <Text style={styles.label}>Categoría</Text>
+      <Text style={styles.label}>
+        Categoría
+      </Text>
       <TextInput
         style={[styles.input, styles.lastInput]}
         placeholder="Ej. Alimentación"
@@ -85,7 +95,9 @@ export default function NewExpenseModal() {
         onPress={guardarGasto}
         activeOpacity={0.8}
       >
-        <Text style={styles.textoBoton}>Guardar</Text>
+        <Text style={styles.textoBoton}>
+          Guardar
+        </Text>
       </TouchableOpacity>
     </View>
   );

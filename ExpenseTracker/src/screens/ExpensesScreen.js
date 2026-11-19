@@ -23,15 +23,17 @@ export default function ExpensesScreen({ navigation }) {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View style={styles.headerContainer}>
-            <Text style={styles.titulo}>Mis gastos</Text>
+            <Text style={styles.titulo}>
+              Mis gastos
+            </Text>
             <Text style={styles.subtitulo}>
-              Toca un gasto para ver su detalle.
+              Estos son tus gastos registrados.
             </Text>
           </View>
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            Todavía no registraste gastos.
+            Todavía no hay gastos cargados.
           </Text>
         }
       />
@@ -64,6 +66,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#7F8C8D',
     fontSize: 16,
-    marginTop: 24,
   },
 });

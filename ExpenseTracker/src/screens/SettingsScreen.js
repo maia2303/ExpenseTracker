@@ -23,4 +23,3 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
   },
 });
-
