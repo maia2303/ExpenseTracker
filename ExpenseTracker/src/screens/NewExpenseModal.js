@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   View,
@@ -23,8 +22,10 @@ export default function NewExpenseModal() {
       return;
     }
 
-    if (isNaN(Number(monto.replace(',', '.'))) ||
-        Number(monto.replace(',', '.')) <= 0) {
+    if (
+      isNaN(Number(monto.replace(',', '.'))) ||
+      Number(monto.replace(',', '.')) <= 0
+    ) {
       Alert.alert('Monto inválido', 'Ingresa un monto mayor que cero.');
       return;
     }

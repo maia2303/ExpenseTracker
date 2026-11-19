@@ -5,7 +5,9 @@ import { View, Text, StyleSheet } from 'react-native';
 const formatearMonto = (monto) =>
   '$' + String(monto).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-export default function ExpenseItem({ descripcion, monto }) {
+export default function ExpenseItem({ title, amount, category, onPress }) {
+  const categoryInfo = getCategoryByName(category);
+
   return (
     <View style={styles.card}>
       <Text style={styles.descripcion}>

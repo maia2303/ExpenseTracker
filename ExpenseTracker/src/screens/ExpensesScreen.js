@@ -2,22 +2,23 @@ import React from 'react';
 import { FlatList, Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ExpenseItem from '../components/ExpenseItem';
+import { useExpenses } from '../context/ExpensesContext';
 
-// Datos definidos manualmente (el Sprint 1 no usa persistencia)
-const GASTOS = [
-  { id: '1', descripcion: 'Supermercado', monto: 25000 },
-  { id: '2', descripcion: 'Combustible', monto: 18000 },
-  { id: '3', descripcion: 'Internet', monto: 32000 },
-];
+export default function ExpensesScreen({ navigation }) {
+  const { expenses } = useExpenses();
 
-export default function ExpensesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={GASTOS}
+        data={expenses}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ExpenseItem descripcion={item.descripcion} monto={item.monto} />
+          <ExpenseItem
+            title={item.title}
+            amount={item.amount}
+            category={item.category}
+            onPress={() => navigation.navigate('DetalleGasto', { id: item.id })}
+          />
         )}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
