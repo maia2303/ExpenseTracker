@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ExpenseItem from '../components/ExpenseItem';
 
@@ -12,26 +12,26 @@ const GASTOS = [
 
 export default function ExpensesScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={GASTOS}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ExpenseItem descripcion={item.descripcion} monto={item.monto} />
         )}
-        contentContainerStyle={{ padding: 24 }}
+        contentContainerStyle={styles.listContent}
         ListHeaderComponent={
-          <View className="mb-4">
-            <Text className="mb-1 text-3xl font-bold text-gray-800">
+          <View style={styles.headerContainer}>
+            <Text style={styles.titulo}>
               Mis gastos
             </Text>
-            <Text className="text-base text-gray-500">
+            <Text style={styles.subtitulo}>
               Estos son tus gastos registrados.
             </Text>
           </View>
         }
         ListEmptyComponent={
-          <Text className="text-center text-gray-500">
+          <Text style={styles.emptyText}>
             Todavía no hay gastos cargados.
           </Text>
         }
@@ -39,3 +39,31 @@ export default function ExpensesScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  listContent: {
+    padding: 24,
+  },
+  headerContainer: {
+    marginBottom: 16,
+  },
+  titulo: {
+    marginBottom: 4,
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+  },
+  subtitulo: {
+    fontSize: 16,
+    color: '#7F8C8D',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#7F8C8D',
+    fontSize: 16,
+  },
+});

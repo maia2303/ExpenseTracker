@@ -1,14 +1,13 @@
 
-import "./global.css";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from '@react-navigation/native';
-import StackNavigator from './src/navegation/StackNavigator';
+import StackNavigator from './src/navigation/StackNavigator';
+
 export default function App() {
-  
   return (
-  <NavigationContainer>
-    <StatusBar style="auto" />
-    <StackNavigator />
-  </NavigationContainer>
-);
+    <NavigationContainer>
+      <StatusBar style="auto" />
+      <StackNavigator />
+    </NavigationContainer>
+  );
 }
