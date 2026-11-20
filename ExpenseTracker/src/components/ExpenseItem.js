@@ -1,22 +1,45 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { getCategoryByName } from '../data/categories';
 
 // Formatea 25000 a $25.000
-const formatearMonto = (monto) =>
-  '$' + String(monto).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+export const formatearMonto = (monto) =>
+  '$' + String(monto ?? 0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 export default function ExpenseItem({ title, amount, category, onPress }) {
   const categoryInfo = getCategoryByName(category);
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.descripcion}>
-        {descripcion}
-      </Text>
-      <Text style={styles.monto}>
-        {formatearMonto(monto)}
-      </Text>
-    </View>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.75}
+    >
+      <View style={styles.leftColumn}>
+        <Text style={styles.title} numberOfLines={1}>
+          {title}
+        </Text>
+        {categoryInfo && (
+          <View
+            style={[
+              styles.categoryBadge,
+              { backgroundColor: (categoryInfo.color || '#7F8C8D') + '20' },
+            ]}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                { color: categoryInfo.color || '#7F8C8D' },
+              ]}
+            >
+              {categoryInfo.name}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <Text style={styles.amount}>{formatearMonto(amount)}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -32,14 +55,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 16,
   },
-  descripcion: {
+  leftColumn: {
     flex: 1,
     paddingRight: 12,
+    alignItems: 'flex-start',
+  },
+  title: {
     fontSize: 16,
     fontWeight: '600',
     color: '#2C3E50',
+    marginBottom: 6,
   },
-  monto: {
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  amount: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2980B9',
