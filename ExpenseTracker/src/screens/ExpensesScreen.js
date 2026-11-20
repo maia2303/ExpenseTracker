@@ -23,18 +23,17 @@ export default function ExpensesScreen({ navigation }) {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View style={styles.headerContainer}>
-            <Text style={styles.titulo}>
-              Mis gastos
-            </Text>
-            <Text style={styles.subtitulo}>
-              Estos son tus gastos registrados.
-            </Text>
+            <Text style={styles.titulo}>Mis gastos</Text>
+            <Text style={styles.subtitulo}>Estos son tus gastos registrados.</Text>
           </View>
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Todavía no hay gastos cargados.
-          </Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>Todavía no registraste gastos.</Text>
+            <Text style={styles.emptySubtext}>
+              Tocá en "Nuevo gasto" para registrar tu primer gasto.
+            </Text>
+          </View>
         }
       />
     </SafeAreaView>
@@ -62,9 +61,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#7F8C8D',
   },
-  emptyText: {
+  emptyContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2C3E50',
+    marginBottom: 8,
     textAlign: 'center',
+  },
+  emptySubtext: {
+    fontSize: 15,
     color: '#7F8C8D',
-    fontSize: 16,
+    textAlign: 'center',
   },
 });
