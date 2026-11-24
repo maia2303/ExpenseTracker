@@ -1,38 +1,33 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const INITIAL_EXPENSES = [
-  
-  {
-    id: '1',
-    title: 'Supermercado',
-    amount: 25000,
-    category: 'Alimentación',
-    notes: 'Compra semanal',
-    createdAt: '2026-11-15T10:30:00.000Z',
-  },
-  {
-    id: '2',
-    title: 'Combustible',
-    amount: 18000,
-    category: 'Transporte',
-    notes: 'Carga de nafta',
-    createdAt: '2026-11-16T14:15:00.000Z',
-  },
-  {
-    id: '3',
-    title: 'Internet',
-    amount: 32000,
-    category: 'Servicios',
-    notes: 'Factura mensual fibra óptica',
-    createdAt: '2026-11-17T09:00:00.000Z',
-  },
-];
 // Sprint 3 : clave para almacenar los gastos en AsyncStorage
 const EXPENSES_KEY = '@expensetracker/expenses';
 // Sprint 3 : clave para almacenar la configuración en AsyncStorage
 const SETTINGS_KEY = '@expensetracker/settings';
 const ExpensesContext = createContext(null);
+
+const DEFAULT_SETTINGS = {
+  notificationsEnabled: false,
+  darkModeEnabled: false,
+};
+
+// Sprint 3 : validaciones para no confiar ciegamente en lo que hay en AsyncStorage
+const isValidExpenses = (data) =>
+  Array.isArray(data) &&
+  data.every(
+    (expense) =>
+      expense &&
+      typeof expense.id === 'string' &&
+      typeof expense.title === 'string' &&
+      typeof expense.amount === 'number'
+  );
+
+const isValidSettings = (data) =>
+  data !== null &&
+  typeof data === 'object' &&
+  typeof data.notificationsEnabled === 'boolean' &&
+  typeof data.darkModeEnabled === 'boolean';
 
 export function ExpensesProvider({ children }) {
   // Sprint 3 : Cargar los gastos desde AsyncStorage al iniciar la aplicación
@@ -48,28 +43,42 @@ export function ExpensesProvider({ children }) {
   let isMounted = true;
 
   const hydrateExpenses = async () => {
+    let storedExpenses;
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const storedExpenses = await AsyncStorage.getItem(EXPENSES_KEY);
-      const loadedExpenses =
-        storedExpenses === null
-          ? INITIAL_EXPENSES
-          : JSON.parse(storedExpenses);
-
-      if (!Array.isArray(loadedExpenses)) {
-        throw new Error('Los gastos guardados no tienen un formato válido.');
-      }
-
-      if (isMounted) {
-        setExpenses(loadedExpenses);
-        setCanPersist(true);
-      }
+      storedExpenses = await AsyncStorage.getItem(EXPENSES_KEY);
     } catch (error) {
-      console.error('Error al cargar los gastos:', error);
-    } finally {
+      // Falló el acceso al almacenamiento: NO habilitamos el guardado (canPersist
+      // queda en false) para no pisar datos que podrían existir.
+      console.error('Error al leer los gastos:', error);
       if (isMounted) {
         setIsLoaded(true);
       }
+      return;
+    }
+
+    let loadedExpenses = [];
+
+    try {
+      if (storedExpenses !== null) {
+        const parsedExpenses = JSON.parse(storedExpenses);
+
+        if (!isValidExpenses(parsedExpenses)) {
+          throw new Error('Los gastos guardados no tienen un formato válido.');
+        }
+
+        loadedExpenses = parsedExpenses;
+      }
+    } catch (error) {
+      // JSON dañado: la app arranca con la lista vacía en lugar de romperse.
+      // Se puede volver a guardar, y el próximo guardado reemplaza el contenido dañado.
+      console.error('Gastos guardados dañados, se inicia con lista vacía:', error);
+    }
+
+    if (isMounted) {
+      setExpenses(loadedExpenses);
+      setCanPersist(true);
+      setIsLoaded(true);
     }
   };
 
@@ -106,37 +115,39 @@ useEffect(() => {
   let isMounted = true;
 
   const hydrateSettings = async () => {
-    try {
-      const storedSettings = await AsyncStorage.getItem(SETTINGS_KEY);
-      let loadedSettings = {
-        notificationsEnabled: false,
-        darkModeEnabled: false,
-      };
+    let storedSettings;
 
+    try {
+      storedSettings = await AsyncStorage.getItem(SETTINGS_KEY);
+    } catch (error) {
+      console.error('Error al leer los ajustes:', error);
+      if (isMounted) {
+        setSettingsLoaded(true);
+      }
+      return;
+    }
+
+    let loadedSettings = DEFAULT_SETTINGS;
+
+    try {
       if (storedSettings !== null) {
         const parsedSettings = JSON.parse(storedSettings);
 
-        if (
-          typeof parsedSettings?.notificationsEnabled !== 'boolean' ||
-          typeof parsedSettings?.darkModeEnabled !== 'boolean'
-        ) {
+        if (!isValidSettings(parsedSettings)) {
           throw new Error('Los ajustes guardados no tienen un formato válido.');
         }
 
         loadedSettings = parsedSettings;
       }
-
-      if (isMounted) {
-        setNotificationsEnabled(loadedSettings.notificationsEnabled);
-        setDarkModeEnabled(loadedSettings.darkModeEnabled);
-        setCanPersistSettings(true);
-      }
     } catch (error) {
-      console.error('Error al cargar los ajustes:', error);
-    } finally {
-      if (isMounted) {
-        setSettingsLoaded(true);
-      }
+      console.error('Ajustes guardados dañados, se usan los valores por defecto:', error);
+    }
+
+    if (isMounted) {
+      setNotificationsEnabled(loadedSettings.notificationsEnabled);
+      setDarkModeEnabled(loadedSettings.darkModeEnabled);
+      setCanPersistSettings(true);
+      setSettingsLoaded(true);
     }
   };
 
