@@ -1,103 +1,70 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../services/firebase';
 
-const INITIAL_EXPENSES = [
-  
-  {
-    id: '1',
-    title: 'Supermercado',
-    amount: 25000,
-    category: 'Alimentación',
-    notes: 'Compra semanal',
-    createdAt: '2026-11-15T10:30:00.000Z',
-  },
-  {
-    id: '2',
-    title: 'Combustible',
-    amount: 18000,
-    category: 'Transporte',
-    notes: 'Carga de nafta',
-    createdAt: '2026-11-16T14:15:00.000Z',
-  },
-  {
-    id: '3',
-    title: 'Internet',
-    amount: 32000,
-    category: 'Servicios',
-    notes: 'Factura mensual fibra óptica',
-    createdAt: '2026-11-17T09:00:00.000Z',
-  },
-];
-// Sprint 3 : clave para almacenar los gastos en AsyncStorage
-const EXPENSES_KEY = '@expensetracker/expenses';
-// Sprint 3 : clave para almacenar la configuración en AsyncStorage
+const EXPENSES_COLLECTION = 'expenses';
+// Sprint 3 : clave para almacenar la configuración en AsyncStorage (Capa 1)
 const SETTINGS_KEY = '@expensetracker/settings';
 const ExpensesContext = createContext(null);
 
 export function ExpensesProvider({ children }) {
-  // Sprint 3 : Cargar los gastos desde AsyncStorage al iniciar la aplicación
   const [expenses, setExpenses] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [canPersist, setCanPersist] = useState(false); //canPersist sirve para no sobrescribir datos si falla la lectura de AsyncStorage.
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [canPersistSettings, setCanPersistSettings] = useState(false);
-// Sprint 3 : Guardar los gastos en AsyncStorage cada vez que cambien
+
+  // Sprint 3 (US #5): Escuchar la colección de gastos en tiempo real desde Cloud Firestore
   useEffect(() => {
-  let isMounted = true;
+    const expensesQuery = query(
+      collection(db, EXPENSES_COLLECTION),
+      orderBy('createdAt', 'desc')
+    );
 
-  const hydrateExpenses = async () => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const storedExpenses = await AsyncStorage.getItem(EXPENSES_KEY);
-      const loadedExpenses =
-        storedExpenses === null
-          ? INITIAL_EXPENSES
-          : JSON.parse(storedExpenses);
+    const unsubscribe = onSnapshot(
+      expensesQuery,
+      (snapshot) => {
+        const loadedExpenses = snapshot.docs.map((snapshotDoc) => {
+          const data = snapshotDoc.data({ serverTimestamps: 'estimate' });
+          const createdAt = data.createdAt?.toDate
+            ? data.createdAt.toDate().toISOString()
+            : typeof data.createdAt === 'string'
+              ? data.createdAt
+              : null;
 
-      if (!Array.isArray(loadedExpenses)) {
-        throw new Error('Los gastos guardados no tienen un formato válido.');
-      }
+          return {
+            id: snapshotDoc.id,
+            title: data.title ?? '',
+            amount: Number(data.amount ?? 0),
+            category: data.category ?? 'Otros',
+            notes: data.notes ?? '',
+            createdAt,
+            hasPendingWrites: snapshotDoc.metadata.hasPendingWrites,
+          };
+        });
 
-      if (isMounted) {
         setExpenses(loadedExpenses);
-        setCanPersist(true);
-      }
-    } catch (error) {
-      console.error('Error al cargar los gastos:', error);
-    } finally {
-      if (isMounted) {
+        setIsLoaded(true);
+      },
+      (error) => {
+        console.error('Error al escuchar los gastos en Firestore:', error);
         setIsLoaded(true);
       }
-    }
-  };
+    );
 
-  hydrateExpenses();
-
-  return () => {
-    isMounted = false;
-  };
-}, []);
-
-useEffect(() => {
-  if (!isLoaded || !canPersist) {
-    return;
-  }
-
-  const persistExpenses = async () => {
-    try {
-      await AsyncStorage.setItem(
-        EXPENSES_KEY,
-        JSON.stringify(expenses)
-      );
-    } catch (error) {
-      console.error('Error al guardar los gastos:', error);
-    }
-  };
-
-  persistExpenses();
-}, [expenses, isLoaded, canPersist]);
+    return () => unsubscribe();
+  }, []);
 
 
 // Sprint 3 : Guardar los ajustes en AsyncStorage cada vez que cambien
@@ -173,22 +140,22 @@ useEffect(() => {
 
   const addExpense = (data) => {
     const newExpense = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       title: String(data.title || '').trim(),
       amount: Number(data.amount),
       category: data.category || 'Otros',
       notes: String(data.notes || '').trim(),
-      createdAt: new Date().toISOString(),
+      createdAt: serverTimestamp(),
     };
 
-    setExpenses((prevExpenses) => [newExpense, ...prevExpenses]);
-    return newExpense;
+    addDoc(collection(db, EXPENSES_COLLECTION), newExpense).catch((error) => {
+      console.error('Error al guardar el gasto en Firestore:', error);
+    });
   };
 
   const removeExpense = (id) => {
-    setExpenses((prevExpenses) =>
-      prevExpenses.filter((expense) => expense.id !== id)
-    );
+    deleteDoc(doc(db, EXPENSES_COLLECTION, id)).catch((error) => {
+      console.error('Error al eliminar el gasto en Firestore:', error);
+    });
   };
 
   return (
