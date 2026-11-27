@@ -30,17 +30,19 @@ const isValidSettings = (data) =>
   typeof data.darkModeEnabled === 'boolean';
 
 export function ExpensesProvider({ children }) {
-  // Sprint 3 : Cargar los gastos desde AsyncStorage al iniciar la aplicación
   const [expenses, setExpenses] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [canPersist, setCanPersist] = useState(false); //canPersist sirve para no sobrescribir datos si falla la lectura de AsyncStorage.
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [canPersistSettings, setCanPersistSettings] = useState(false);
-// Sprint 3 : Guardar los gastos en AsyncStorage cada vez que cambien
+
+  // Sprint 3 (US #5): Escuchar la colección de gastos en tiempo real desde Cloud Firestore
   useEffect(() => {
-  let isMounted = true;
+    const expensesQuery = query(
+      collection(db, EXPENSES_COLLECTION),
+      orderBy('createdAt', 'desc')
+    );
 
   const hydrateExpenses = async () => {
     let storedExpenses;
@@ -105,8 +107,8 @@ useEffect(() => {
     }
   };
 
-  persistExpenses();
-}, [expenses, isLoaded, canPersist]);
+    return () => unsubscribe();
+  }, []);
 
 
 // Sprint 3 : Guardar los ajustes en AsyncStorage cada vez que cambien
@@ -184,22 +186,22 @@ useEffect(() => {
 
   const addExpense = (data) => {
     const newExpense = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       title: String(data.title || '').trim(),
       amount: Number(data.amount),
       category: data.category || 'Otros',
       notes: String(data.notes || '').trim(),
-      createdAt: new Date().toISOString(),
+      createdAt: serverTimestamp(),
     };
 
-    setExpenses((prevExpenses) => [newExpense, ...prevExpenses]);
-    return newExpense;
+    addDoc(collection(db, EXPENSES_COLLECTION), newExpense).catch((error) => {
+      console.error('Error al guardar el gasto en Firestore:', error);
+    });
   };
 
   const removeExpense = (id) => {
-    setExpenses((prevExpenses) =>
-      prevExpenses.filter((expense) => expense.id !== id)
-    );
+    deleteDoc(doc(db, EXPENSES_COLLECTION, id)).catch((error) => {
+      console.error('Error al eliminar el gasto en Firestore:', error);
+    });
   };
 
   return (
